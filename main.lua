@@ -11,15 +11,21 @@ local function serverhop()
     local cursor = ""
 
     for _ = 1, 8 do
-        local response = http_service:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..place_id.."/servers/Public?sortOrder=Asc&limit=100&cursor="..cursor, true))
-        if response and response.data then
-            for _, server in ipairs(response.data) do
+        task.wait(1.5)
+        local success, result = pcall(function()
+            return http_service:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..place_id.."/servers/Public?sortOrder=Asc&limit=100&cursor="..cursor, true))
+        end)
+
+        if success and result and result.data then
+            for _, server in ipairs(result.data) do
                 if server.playing < server.maxPlayers and server.id ~= job_id then
                     table.insert(servers, server.id)
                 end
             end
-            cursor = response.nextPageCursor or ""
+            cursor = result.nextPageCursor or ""
             if cursor == "" then break end
+        else
+            break
         end
     end
 
